@@ -145,28 +145,93 @@ The server listens on localhost and is intended for a trusted local user, not pu
 
 This app demonstrates the agent loop and the division between the hosted session and the application: create a session, send messages, observe live events, reconnect to persisted history, and respond to actions. Your host retains responsibility for user authorization and business decisions.
 
-## How the app was developed
+## How the app was build
 
-1. The Node server loads the API configuration and creates a Managed Agents client. Credentials remain on the server.
-   ```js
-   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-   ```
-2. The session endpoint references an existing agent and environment and sets a list-cost budget.
-   ```js
-   const session = await client.beta.sessions.create({
-     agent: process.env.CLAUDE_MANAGED_AGENT_ID,
-     environment_id: process.env.CLAUDE_MANAGED_ENVIRONMENT_ID,
-     budget: { type: "limit", max_list_cost: { amount: "50", currency: "USD" } },
-   });
-   ```
-3. The server opens an event stream and lists recorded events, deduplicating by ID before forwarding them to the browser. Opening the stream first helps avoid missing events while history is loaded.
-   ```js
-   const stream = await client.beta.sessions.events.stream(id);
-   for await (const event of client.beta.sessions.events.list(id)) emit(state, event);
-   ```
-4. The browser submits messages to the local server; the server sends a `user.message` event and displays resulting activity. The action panel allows the learner to respond to supported requests.
-   ```js
-   await client.beta.sessions.events.send(id, {
-     events: [{ type: "user.message", content: [{ type: "text", text: data.text.trim() }] }],
-   });
-   ```
+### 1. Create a budgeted session from reusable resources
+
+The host selects the configured agent and environment and sets a 50-cent list-cost budget. The API key remains in the Node process; the browser requests this operation through the local route.
+
+Source: [server.js](server.js#L82)
+
+```javascript
+const session = await client.beta.sessions.create({
+  agent: process.env.CLAUDE_MANAGED_AGENT_ID,
+  environment_id: process.env.CLAUDE_MANAGED_ENVIRONMENT_ID,
+  budget: {
+    type: "limit",
+    max_list_cost: { amount: "50", currency: "USD" },
+  },
+});
+```
+
+### 2. Open observation before loading recorded history
+
+attach opens the live stream first, then loads retained events through the same emit function. The stream can buffer events while history is read, reducing the gap between recorded and live observation.
+
+Source: [server.js](server.js#L36) · selected statements
+
+```javascript
+const stream = await client.beta.sessions.events.stream(id);
+
+// ... other source statements omitted ...
+const state = { events: [], seen: new Set(), listeners: new Set(), stream };
+
+// ... other source statements omitted ...
+for await (const event of client.beta.sessions.events.list(id)) emit(state, event);
+```
+
+### 3. Deduplicate and forward events to browser listeners
+
+The Set suppresses repeated persisted IDs, while the local event list supports replay to a newly connected browser. These SSE frames are the host-to-browser stream; the SDK owns a separate provider stream.
+
+Source: [server.js](server.js#L26)
+
+```javascript
+function emit(state, event) {
+  if (event.id && state.seen.has(event.id)) return;
+  if (event.id) state.seen.add(event.id);
+  state.events.push(event);
+  const line = `data: ${JSON.stringify(event)}\n\n`;
+  for (const res of state.listeners) res.write(line);
+}
+```
+
+### 4. Send the student message through the host
+
+The validated browser text becomes user.message. The session ID identifies the ongoing conversation, so a later message can reuse its retained context rather than creating a new session.
+
+Source: [server.js](server.js#L132)
+
+```javascript
+await client.beta.sessions.events.send(id, {
+  events: [
+    {
+      type: "user.message",
+      content: [{ type: "text", text: data.text.trim() }],
+    },
+  ],
+});
+```
+
+### 5. Keep custom results distinct from approvals
+
+A custom tool response uses custom_tool_use_id and result text. An allow/deny confirmation instead uses tool_use_id. Both correlate an earlier event, but only the second is a permission decision.
+
+Source: [server.js](server.js#L157)
+
+```javascript
+if (data.result === "custom") {
+  if (typeof data.text !== "string" || !data.text.trim())
+    return json(res, 400, { error: "Enter the custom tool result." });
+  event = {
+    type: "user.custom_tool_result",
+    custom_tool_use_id: data.id,
+    content: [{ type: "text", text: data.text }],
+  };
+} else
+  event = {
+    type: "user.tool_confirmation",
+    tool_use_id: data.id,
+    result: data.result,
+  };
+```
