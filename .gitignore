@@ -1,0 +1,19 @@
+node_modules/
+presentation/
+output/
+reviewed/
+v3/
+teaching-material/
+
+# Credentials and local settings; keep the student configuration example.
+.env*
+!.env.example
+*.pem
+*.key
+
+# Local build and script artifacts.
+__pycache__/
+*.py[cod]
+*.log
+.npm-cache/
+.DS_Store

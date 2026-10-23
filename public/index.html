@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Managed Agents · Session Lab</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="course-bar"><div class="course-title">How <span>Claude Managed Agents</span> Works</div><span class="course-tag">CONCEPT 01 / 60</span></div>
+      <header>
+        <div>
+          <p class="eyebrow">CLAUDE MANAGED AGENTS / LAB 01</p>
+          <h1>Give an agent a task.<br /><span>See what happens.</span></h1>
+          <p class="intro">
+            Create a session, follow its events, and stay in control of remote
+            work.
+          </p>
+        </div>
+        <div class="header-controls">
+          <div class="hero-art"><img src="/astronaut.png" alt=""><span>LESSON C01<br>AGENT FOUNDATIONS</span></div>
+          <button
+            id="themeToggle"
+            class="secondary theme-toggle"
+            type="button"
+            aria-pressed="false"
+          >
+            Switch to dark mode
+          </button>
+        </div>
+      </header>
+      <section class="lesson-flow" aria-label="Session workflow">
+        <div><b>01</b><span><strong>Create</strong><small>Start a session</small></span></div><i>→</i>
+        <div><b>02</b><span><strong>Observe</strong><small>Follow live events</small></span></div><i>→</i>
+        <div><b>03</b><span><strong>Respond</strong><small>Stay in control</small></span></div>
+      </section>
+      <nav class="student-nav" aria-label="Lesson sections">
+        <a href="/guide.html#learning">What you will learn</a>
+        <a href="/guide.html#run-guide">How to run the application</a>
+        <a href="/architecture.html">Architecture &amp; workflow</a>
+        <a href="/#session-lab" class="lab-link">Session lab <span aria-hidden="true">↗</span></a>
+      </nav>
+      <div id="notice" class="notice" hidden></div>
+      <div class="layout" id="session-lab" tabindex="-1">
+        <section class="workspace">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">01 / SESSION</p>
+              <h2>Start a conversation</h2>
+            </div>
+            <span id="status" class="pill">Not connected</span>
+          </div>
+          <div class="session-bar">
+            <button id="create">＋ New session</button
+            ><input
+              id="sessionId"
+              aria-label="Existing session ID"
+              placeholder="Or enter an existing session ID"
+            /><button id="connect" class="secondary">Connect</button>
+          </div>
+          <p class="hint">
+            New sessions use your configured agent and environment with a 50¢
+            list-cost budget.
+          </p>
+          <div id="feed" class="feed">
+            <div class="empty">
+              <div class="empty-icon">✦</div>
+              <h3>Ready when you are</h3>
+              <p>Create or connect to a session to see its activity here.</p>
+            </div>
+          </div>
+          <form id="messageForm">
+            <label for="message">YOUR MESSAGE</label
+            ><textarea
+              id="message"
+              placeholder="What would you like your agent to do?"
+              rows="3"
+              disabled
+            ></textarea>
+            <div class="form-footer">
+              <span>Messages are sent after the live stream opens.</span
+              ><button id="send" disabled>Send message ↗</button>
+            </div>
+          </form>
+        </section>
+        <aside>
+          <section class="card">
+            <p class="eyebrow">02 / SESSION STATUS</p>
+            <h2>Keep track</h2>
+            <div class="metric">
+              <span>Session ID</span><strong id="currentId">—</strong>
+            </div>
+            <div class="metric">
+              <span>Stop reason</span><strong id="reason">—</strong>
+            </div>
+            <p id="reasonHelp" class="hint">
+              The session state will appear here as events arrive.
+            </p>
+            <div class="actions">
+              <button id="refresh" class="secondary" disabled>
+                Inspect session</button
+              ><button id="interrupt" class="danger" disabled>
+                Interrupt work
+              </button>
+            </div>
+            <p class="hint">
+              Interrupt requests a stop; inspect the session to confirm it is
+              idle.
+            </p>
+          </section>
+          <section class="card" id="actionCard">
+            <p class="eyebrow">03 / PENDING ACTION</p>
+            <h2>Human in the loop</h2>
+            <p class="hint">
+              When the session requires action, inspect the matching event in
+              the activity feed. For a tool approval, choose Allow or Deny.
+              For a custom tool request, enter its result and choose Send result.
+              See the README for a guided example.
+            </p>
+            <label for="eventId">EVENT ID</label
+            ><input id="eventId" placeholder="Event ID" disabled /><label
+              for="toolResult"
+              >CUSTOM TOOL RESULT</label
+            ><textarea
+              id="toolResult"
+              rows="2"
+              placeholder="Optional result text"
+              disabled
+            ></textarea>
+            <div class="action-buttons">
+              <button class="secondary action" data-action="allow" disabled>
+                Allow</button
+              ><button class="secondary action" data-action="deny" disabled>
+                Deny</button
+              ><button class="secondary action" data-action="custom" disabled>
+                Send result
+              </button>
+            </div>
+          </section>
+          <div class="footnote">
+            ✳ &nbsp; Agent claims are a starting point. Inspect the resulting
+            artifact and remote session state.
+          </div>
+        </aside>
+      </div>
+    </main>
+    <script src="/navigation.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

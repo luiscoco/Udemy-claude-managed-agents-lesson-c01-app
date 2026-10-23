@@ -1,0 +1,25 @@
+{
+  "name": "lesson-c01-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js && node --check public/app.js && node --check public/navigation.js",
+    "dev": "node server.js",
+    "create-agent": "node scripts/create-agent.js",
+    "create-pending-demo-agent": "node scripts/create-pending-demo-agent.js",
+    "create-environment": "node scripts/create-environment.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "dotenv": "^18.0.8"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10"
+  }
+}

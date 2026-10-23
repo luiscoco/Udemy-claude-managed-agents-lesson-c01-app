@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1650" viewBox="0 0 1320 1650" role="img" aria-labelledby="title description">
+<title id="title">C01 — Create a session and follow its first turn</title>
+<desc id="description">UML sequence diagram with five participants: student, browser UI, Node.js host, Anthropic SDK, and Managed Agents. Twenty-one numbered messages show session creation, opening the provider stream before listing history, browser SSE, sending a prompt, and observing the result. The architecture page provides the full text equivalent.</desc>
+<defs>
+<marker id="request" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0 L12 6 L0 12 Z" fill="#193269"/></marker>
+<marker id="response" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto"><path d="M1 1 L11 6 L1 11" fill="none" stroke="#193269" stroke-width="2"/></marker>
+</defs>
+<rect width="1320" height="1650" rx="26" fill="#fff"/>
+<rect x="1" y="1" width="1318" height="1648" rx="26" fill="none" stroke="#d7e7f5" stroke-width="2"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#090d3b}</style>
+<text x="34" y="49" font-size="26" font-weight="700" fill="#0872d4" style="fill:#0872d4">LESSON C01 / UML SEQUENCE DIAGRAM</text>
+<text x="34" y="104" font-size="43" font-weight="700" fill="#090d3b" style="fill:#090d3b">Create a session. Observe its first turn.</text>
+<text x="34" y="148" font-size="28" font-weight="400" fill="#193269" style="fill:#193269">Live application path • read from top to bottom</text>
+<rect x="548" y="176" width="504" height="43" rx="9" fill="#f1eaff" stroke="#d7e7f5" stroke-width="2"/>
+<text x="561" y="207" font-size="26" font-weight="700" fill="#6534a2" style="fill:#6534a2">Host process: Node.js + Anthropic SDK</text>
+<rect x="27" y="232" width="226" height="94" rx="16" fill="#edf7ff" stroke="#d7e7f5" stroke-width="2"/>
+<rect x="27" y="232" width="226" height="7" rx="3" fill="#087dfa"/>
+<text x="40" y="273" font-size="27" font-weight="700" fill="#090d3b" style="fill:#090d3b">Student</text>
+<text x="40" y="310" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Browser user</text>
+<line x1="140" y1="326" x2="140" y2="1474" stroke="#97aac1" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="287" y="232" width="226" height="94" rx="16" fill="#edf7ff" stroke="#d7e7f5" stroke-width="2"/>
+<rect x="287" y="232" width="226" height="7" rx="3" fill="#087dfa"/>
+<text x="300" y="273" font-size="27" font-weight="700" fill="#090d3b" style="fill:#090d3b">Browser UI</text>
+<text x="300" y="310" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">public/app.js</text>
+<line x1="400" y1="326" x2="400" y2="1474" stroke="#97aac1" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="547" y="232" width="226" height="94" rx="16" fill="#f3edff" stroke="#d7e7f5" stroke-width="2"/>
+<rect x="547" y="232" width="226" height="7" rx="3" fill="#853df2"/>
+<text x="560" y="273" font-size="27" font-weight="700" fill="#090d3b" style="fill:#090d3b">Node.js host</text>
+<text x="560" y="310" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">server.js</text>
+<line x1="660" y1="326" x2="660" y2="1474" stroke="#97aac1" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="807" y="232" width="226" height="94" rx="16" fill="#f3edff" stroke="#d7e7f5" stroke-width="2"/>
+<rect x="807" y="232" width="226" height="7" rx="3" fill="#853df2"/>
+<text x="820" y="273" font-size="27" font-weight="700" fill="#090d3b" style="fill:#090d3b">Anthropic SDK</text>
+<text x="820" y="310" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Server-side client</text>
+<line x1="920" y1="326" x2="920" y2="1474" stroke="#97aac1" stroke-width="2" stroke-dasharray="7 7"/>
+<rect x="1067" y="232" width="226" height="94" rx="16" fill="#eaf8f1" stroke="#d7e7f5" stroke-width="2"/>
+<rect x="1067" y="232" width="226" height="7" rx="3" fill="#00865d"/>
+<text x="1080" y="273" font-size="27" font-weight="700" fill="#090d3b" style="fill:#090d3b">Managed Agents</text>
+<text x="1080" y="310" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Remote session</text>
+<line x1="1180" y1="326" x2="1180" y2="1474" stroke="#97aac1" stroke-width="2" stroke-dasharray="7 7"/>
+<line x1="140" y1="381" x2="400" y2="381" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="150" y="369" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">1. New session</text>
+<line x1="400" y1="434" x2="660" y2="434" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="410" y="422" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">2. POST session</text>
+<line x1="660" y1="487" x2="920" y2="487" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="670" y="475" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">3. sessions.create</text>
+<line x1="920" y1="540" x2="1180" y2="540" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="930" y="528" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">4. Create request</text>
+<line x1="1180" y1="593" x2="920" y2="593" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="930" y="581" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">5. Session + ID</text>
+<line x1="920" y1="646" x2="660" y2="646" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="670" y="634" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">6. Created session</text>
+<path d="M 660 682 h 43 v 22 h -43" fill="none" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="714" y="698" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">7. attach(id)</text>
+<line x1="660" y1="752" x2="920" y2="752" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="670" y="740" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">8. events.stream</text>
+<line x1="920" y1="805" x2="1180" y2="805" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="930" y="793" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">9. Open live stream</text>
+<line x1="660" y1="858" x2="920" y2="858" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="670" y="846" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">10. events.list</text>
+<line x1="1180" y1="911" x2="660" y2="911" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="670" y="899" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">11. History via SDK</text>
+<line x1="660" y1="964" x2="400" y2="964" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="410" y="952" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">12. Session ready</text>
+<line x1="400" y1="1017" x2="660" y2="1017" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="410" y="1005" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">13. GET SSE stream</text>
+<line x1="660" y1="1070" x2="400" y2="1070" stroke="#193269" stroke-width="2.5" marker-end="url(#response)"/>
+<text x="410" y="1058" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">14. Buffered events</text>
+<line x1="140" y1="1123" x2="400" y2="1123" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="150" y="1111" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">15. Send message</text>
+<line x1="400" y1="1176" x2="660" y2="1176" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="410" y="1164" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">16. POST message</text>
+<line x1="660" y1="1229" x2="920" y2="1229" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="670" y="1217" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">17. events.send</text>
+<line x1="920" y1="1282" x2="1180" y2="1282" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="930" y="1270" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">18. user.message</text>
+<line x1="1180" y1="1335" x2="660" y2="1335" stroke="#193269" stroke-width="2.5" marker-end="url(#response)"/>
+<text x="670" y="1323" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">19. Agent + status events via SDK</text>
+<line x1="660" y1="1388" x2="400" y2="1388" stroke="#193269" stroke-width="2.5" marker-end="url(#response)"/>
+<text x="410" y="1376" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">20. Live SSE events</text>
+<line x1="400" y1="1441" x2="140" y2="1441" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="150" y="1429" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">21. Answer + state</text>
+<rect x="27" y="1492" width="1266" height="61" rx="12" fill="#eaf8f1" stroke="#d7e7f5" stroke-width="2"/>
+<text x="45" y="1532" font-size="28" font-weight="700" fill="#056b4b" style="fill:#056b4b">Create once → open stream before history → send after observation is ready.</text>
+<line x1="44" y1="1590" x2="106" y2="1590" stroke="#193269" stroke-width="2.5" marker-end="url(#request)"/>
+<text x="54" y="1578" font-size="26" font-weight="400" fill="#193269" style="fill:#193269"></text>
+<text x="120" y="1598" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Request</text>
+<line x1="325" y1="1590" x2="387" y2="1590" stroke="#193269" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#response)"/>
+<text x="335" y="1578" font-size="26" font-weight="400" fill="#193269" style="fill:#193269"></text>
+<text x="400" y="1598" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Returned data</text>
+<line x1="678" y1="1590" x2="740" y2="1590" stroke="#193269" stroke-width="2.5" marker-end="url(#response)"/>
+<text x="688" y="1578" font-size="26" font-weight="400" fill="#193269" style="fill:#193269"></text>
+<text x="754" y="1598" font-size="26" font-weight="400" fill="#193269" style="fill:#193269">Event notification</text>
+</svg>

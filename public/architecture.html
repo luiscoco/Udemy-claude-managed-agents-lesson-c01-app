@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>C01 · Architecture &amp; workflow</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main>
+      <div class="course-bar"><div class="course-title">How <span>Claude Managed Agents</span> Works</div><span class="course-tag">CONCEPT 01 / 60</span></div>
+      <header>
+        <div>
+          <p class="eyebrow">LESSON C01 / ARCHITECTURE &amp; WORKFLOW</p>
+          <h1>Follow every request.<br /><span>Understand every step.</span></h1>
+          <p class="intro">Trace a conversation from the student to the remote session and back. This UML sequence diagram follows the actual C01 implementation.</p>
+        </div>
+        <div class="header-controls">
+          <div class="hero-art"><img src="/astronaut.png" alt=""><span>LESSON C01<br>AGENT FOUNDATIONS</span></div>
+          <button id="themeToggle" class="secondary theme-toggle" type="button" aria-pressed="false">Switch to dark mode</button>
+        </div>
+      </header>
+      <nav class="student-nav" aria-label="Lesson sections">
+        <a href="/guide.html#learning">What you will learn</a>
+        <a href="/guide.html#run-guide">How to run the application</a>
+        <a href="/architecture.html">Architecture &amp; workflow</a>
+        <a href="/#session-lab" class="lab-link">Session lab <span aria-hidden="true">↗</span></a>
+      </nav>
+      <section id="prerequisites" class="student-section" aria-labelledby="prerequisites-title">
+        <div class="student-heading">
+          <p class="eyebrow">STEP 0 / PREPARE YOUR WORKSPACE</p>
+          <h2 id="prerequisites-title">Before the workflow: prepare an agent and environment</h2>
+          <p>A session needs both an agent ID and an environment ID. After installing dependencies and configuring the API key in step 1, reuse suitable existing resource IDs and skip steps 2–3. Create only the resources you are missing; each creation command makes a new remote resource.</p>
+        </div>
+        <p class="learning-outcome"><strong>Setup → conversation:</strong> configure the API key → create or reuse an agent → create or reuse an environment → save both IDs → start the app → create a session.</p>
+        <ol id="prerequisite-steps" class="run-steps">
+          <li><div class="step-content">
+            <h3>Install dependencies and configure the API key</h3>
+            <p>Open PowerShell in <code>lesson-c01/lesson-c01-app</code>, the folder containing <code>package.json</code>. Install dependencies and create <code>.env</code> only if it does not already exist:</p>
+            <pre><code class="language-powershell">npm install
+if (!(Test-Path .env)) { Copy-Item .env.example .env }</code></pre>
+            <p>Enter your real <code>ANTHROPIC_API_KEY</code> in <code>.env</code>. The workspace must have Managed Agents access. The setup scripts load this file and check for a missing key before creating resources.</p>
+          
+<!-- walkthrough-code:setup1 -->
+<figure class="code-example">
+<figcaption>scripts/create-agent.js · shared setup pattern · source excerpt</figcaption>
+<pre><code class="language-javascript">require(&quot;dotenv&quot;).config({ quiet: true });
+const Anthropic = require(&quot;@anthropic-ai/sdk&quot;);
+if (
+  !process.env.ANTHROPIC_API_KEY ||
+  process.env.ANTHROPIC_API_KEY === &quot;your_api_key&quot;
+) {
+  console.error(&quot;Set ANTHROPIC_API_KEY in .env before running this command.&quot;);
+  process.exit(1);
+}
+const client = new Anthropic();</code></pre>
+<p class="code-explanation">dotenv loads the local .env file. The script checks the API key and constructs the SDK client. create-environment.js uses the same setup pattern; neither script puts the key in browser code.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content">
+            <h3>Create the agent configuration</h3>
+            <pre><code class="language-powershell">npm run create-agent</code></pre>
+            <p>This runs <code>scripts/create-agent.js</code>. The agent configuration defines the model, instructions, and available tools; it is not a conversation. The script prints <code>CLAUDE_MANAGED_AGENT_ID=...</code>. Save that returned ID.</p>
+            <p>The model shown below is the script's configured choice. If your workspace rejects it, select a model supported by that workspace before retrying.</p>
+          
+<!-- walkthrough-code:setup2 -->
+<figure class="code-example">
+<figcaption>scripts/create-agent.js · create and report the agent ID · source excerpt</figcaption>
+<pre><code class="language-javascript">const agent = await client.beta.agents.create({
+  name: &quot;Session Lab Agent&quot;,
+  model: &quot;claude-sonnet-4-6&quot;,
+  system: &quot;You are a helpful assistant.&quot;,
+  tools: [{ type: &quot;agent_toolset_20260401&quot; }],
+});
+console.log(&quot;CLAUDE_MANAGED_AGENT_ID=&quot; + agent.id);
+console.log(&quot;Copy this value into .env.&quot;);</code></pre>
+<p class="code-explanation">name identifies the configuration, model selects its model, system supplies instructions, and tools enables the built-in toolset. agents.create returns the new agent ID for later session creation. This call does not send a user message.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content">
+            <h3>Create the environment configuration</h3>
+            <pre><code class="language-powershell">npm run create-environment</code></pre>
+            <p>This runs <code>scripts/create-environment.js</code>. It creates a reusable cloud environment configuration with limited networking and package-manager access enabled. The script prints <code>CLAUDE_MANAGED_ENVIRONMENT_ID=...</code>. Save that returned ID.</p>
+            <p>This setup request creates a configuration; it does not create the conversation or demonstrate a command running in a session workspace.</p>
+          
+<!-- walkthrough-code:setup3 -->
+<figure class="code-example">
+<figcaption>scripts/create-environment.js · create and report the environment ID · source excerpt</figcaption>
+<pre><code class="language-javascript">const environment = await client.beta.environments.create({
+  name: &quot;Session Lab Environment&quot;,
+  config: {
+    type: &quot;cloud&quot;,
+    networking: { type: &quot;limited&quot;, allow_package_managers: true },
+  },
+});
+console.log(&quot;CLAUDE_MANAGED_ENVIRONMENT_ID=&quot; + environment.id);
+console.log(&quot;Copy this value into .env.&quot;);</code></pre>
+<p class="code-explanation">The cloud configuration selects limited networking while enabling its package-manager exception. environments.create returns a reusable environment ID. Creating this record is separate from creating and observing a session.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content">
+            <h3>Save both IDs, then start the application</h3>
+            <p>Copy the printed IDs into the matching entries in <code>.env</code>, keeping your API key. Replace the example values below with your own:</p>
+            <pre><code class="language-dotenv">ANTHROPIC_API_KEY=your_api_key
+CLAUDE_MANAGED_AGENT_ID=your_agent_id
+CLAUDE_MANAGED_ENVIRONMENT_ID=your_environment_id
+PORT=3000</code></pre>
+            <pre><code class="language-powershell">npm start</code></pre>
+            <p>If the server was already running, stop it with <strong>Ctrl+C</strong> and start it again to reload <code>.env</code>. Open <code>http://127.0.0.1:3000</code> and click <strong>New session</strong>. The runtime workflow below now uses the saved agent and environment IDs.</p>
+            <p class="step-note"><strong>For the optional pending-action exercise:</strong> <code>npm run create-pending-demo-agent</code> creates a separate agent with a custom tool and confirmation policy. Save your original agent ID before replacing it in <code>.env</code>; reuse the environment ID and restart the server. This extra agent is not required for an ordinary conversation.</p>
+          </div></li>
+        </ol>
+        <div class="student-nav" aria-label="Setup next steps">
+          <a href="#architecture-title">Next: follow the UML sequence ↓</a>
+          <a href="#walkthrough">Go to the runtime code walkthrough ↓</a>
+        </div>
+      </section>
+      <section class="student-section" aria-labelledby="architecture-title">
+        <div class="student-heading">
+          <p class="eyebrow">THE BIG PICTURE</p>
+          <h2 id="architecture-title">Create a session and observe its first turn</h2>
+          <p>Each column is a participant. Read the numbered arrows from top to bottom. The Anthropic SDK runs inside the Node.js host; Managed Agents is the remote service.</p>
+        </div>
+        <figure class="uml-figure">
+          <div class="diagram-scroll" tabindex="0" role="region" aria-label="Scrollable UML sequence infographic" aria-describedby="diagram-caption">
+            <img class="uml-image" src="/architecture.svg" width="1320" height="1650" alt="UML sequence: student, browser UI, Node.js host, Anthropic SDK, and Managed Agents exchange 21 messages to create, observe, and prompt a session. The numbered walkthrough below explains each group of messages." />
+          </div>
+          <figcaption id="diagram-caption">Solid arrows show requests, dashed arrows show returned data, and open arrows show event notifications. On a narrow screen, scroll the diagram sideways to keep the text large.</figcaption>
+        </figure>
+        <div class="student-nav diagram-links" aria-label="Diagram files">
+          <a href="/architecture.svg" target="_blank" rel="noopener">Open full-size diagram ↗</a>
+          <a href="/architecture.svg" download="C01-UML-Architecture.svg">Download SVG</a>
+          <a href="/architecture.png" download="C01-UML-Architecture.png">Download PNG</a>
+        </div>
+      </section>
+      <section id="walkthrough" class="student-section" aria-labelledby="walkthrough-title">
+        <div class="student-heading">
+          <p class="eyebrow">CONNECT THE DIAGRAM TO THE CODE</p>
+          <h2 id="walkthrough-title">Walk through the application step by step</h2>
+        </div>
+        <ol class="run-steps">
+          <li><div class="step-content"><h3>Create the remote session · arrows 1–6</h3><p>The student clicks <strong>New session</strong>. <code>public/app.js</code> posts to <code>/api/sessions</code>. The Node.js host calls <code>client.beta.sessions.create</code> with the configured agent ID, environment ID, and a 50¢ list-cost budget. The SDK returns the created session and its ID to the host.</p>
+
+<!-- walkthrough-code:1 -->
+<figure class="code-example">
+<figcaption>public/app.js · New session button · source excerpt</figcaption>
+<pre><code class="language-javascript">const session = await api(&quot;/api/sessions&quot;, { method: &quot;POST&quot; });
+connect(session.id);</code></pre>
+<p class="code-explanation">The browser asks the local server to create the session, then passes the returned ID to connect(). It does not call Anthropic directly.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · create a managed session · source excerpt</figcaption>
+<pre><code class="language-javascript">const session = await client.beta.sessions.create({
+  agent: process.env.CLAUDE_MANAGED_AGENT_ID,
+  environment_id: process.env.CLAUDE_MANAGED_ENVIRONMENT_ID,
+  budget: {
+    type: &quot;limit&quot;,
+    max_list_cost: { amount: &quot;50&quot;, currency: &quot;USD&quot; },
+  },
+});</code></pre>
+<p class="code-explanation">The host selects the configured agent and environment. The budget amount is expressed in cents: &quot;50&quot; means 50¢ of USD list cost.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content"><h3>Prepare observation · arrows 7–11</h3><p>The host calls <code>attach(id)</code>. It opens <code>events.stream(id)</code> <strong>before</strong> reading <code>events.list(id)</code>. The SDK buffers live delivery while history is loaded. The host keeps events in memory and deduplicates records with IDs before forwarding them. This event buffer is not a durable database.</p>
+
+<!-- walkthrough-code:2 -->
+<figure class="code-example">
+<figcaption>server.js · attach(): open stream, then read history · source excerpt</figcaption>
+<pre><code class="language-javascript">const stream = await client.beta.sessions.events.stream(id);
+const state = { events: [], seen: new Set(), listeners: new Set(), stream };
+try {
+  for await (const event of client.beta.sessions.events.list(id))
+    emit(state, event);
+} catch (error) {
+  stream.controller.abort();
+  throw error;
+}</code></pre>
+<p class="code-explanation">The stream opens first so live delivery can be buffered while history is fetched. If reading history fails, the host aborts this stream and surfaces the error.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · emit(): deduplicate and retain records · source excerpt</figcaption>
+<pre><code class="language-javascript">function emit(state, event) {
+  if (event.id &amp;&amp; state.seen.has(event.id)) return;
+  if (event.id) state.seen.add(event.id);
+  state.events.push(event);
+  const line = `data: ${JSON.stringify(event)}\n\n`;
+  for (const res of state.listeners) res.write(line);
+}</code></pre>
+<p class="code-explanation">seen prevents repeated IDs from being forwarded twice. The events array supports replay to the browser, and listeners receive SSE text. These collections live only in host memory.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content"><h3>Connect the browser feed · arrows 12–14</h3><p>After preparing the host reader, the create route returns the session to the browser. The browser opens an <code>EventSource</code> connection to <code>/api/sessions/:id/stream</code>. This browser SSE connection is separate from the provider stream opened in step 2. The host sends its buffered records and forwards new events.</p>
+
+<!-- walkthrough-code:3 -->
+<figure class="code-example">
+<figcaption>server.js · return the created session · source excerpt</figcaption>
+<pre><code class="language-javascript">try {
+  await attach(session.id);
+} catch (error) {
+  return json(res, 502, {
+    error: `Session ${session.id} was created, but its stream could not be opened: ${error.message}`,
+    sessionId: session.id,
+  });
+}
+return json(res, 201, session);</code></pre>
+<p class="code-explanation">The create route prepares the host reader before returning the session. If attachment fails after creation, it reports the created session ID rather than pretending creation never happened.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>public/app.js · browser EventSource · source excerpt</figcaption>
+<pre><code class="language-javascript">source = new EventSource(`/api/sessions/${encodeURIComponent(id)}/stream`);
+source.onopen = () =&gt; {
+  $(&quot;status&quot;).textContent = &quot;Connected&quot;;
+  enabled(true);
+};
+source.onmessage = (e) =&gt; showEvent(JSON.parse(e.data));</code></pre>
+<p class="code-explanation">This opens the browser-to-host SSE connection. The controls become enabled on connection, and incoming records are passed to showEvent().</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · browser SSE endpoint · source excerpt</figcaption>
+<pre><code class="language-javascript">if (req.method === &quot;GET&quot; &amp;&amp; operation === &quot;stream&quot;) {
+  const state = await attach(id);
+  res.writeHead(200, {
+    &quot;Content-Type&quot;: &quot;text/event-stream&quot;,
+    &quot;Cache-Control&quot;: &quot;no-cache, no-transform&quot;,
+    Connection: &quot;keep-alive&quot;,
+  });
+  res.write(&quot;: connected\n\n&quot;);
+  for (const event of state.events)
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  state.listeners.add(res);
+  req.on(&quot;close&quot;, () =&gt; state.listeners.delete(res));
+  return;
+}</code></pre>
+<p class="code-explanation">The host first replays its buffered records, then keeps this HTTP response in its listener set. Closing the browser connection removes that listener; it does not interrupt the remote session.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content"><h3>Send a prompt · arrows 15–18</h3><p>The student enters a prompt and clicks <strong>Send message</strong>. The browser posts to <code>/api/sessions/:id/message</code>. The host validates the text, ensures a reader exists with <code>attach(id)</code>, and sends a <code>user.message</code> through <code>events.send</code>. The API key remains on the host.</p>
+
+<!-- walkthrough-code:4 -->
+<figure class="code-example">
+<figcaption>public/app.js · submit the message · source excerpt</figcaption>
+<pre><code class="language-javascript">await api(`/api/sessions/${id}/message`, {
+  method: &quot;POST&quot;,
+  body: JSON.stringify({ text }),
+});</code></pre>
+<p class="code-explanation">The browser sends JSON to the local message endpoint. The current session ID keeps the prompt in the same conversation.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · validate message text · source excerpt</figcaption>
+<pre><code class="language-javascript">const data = await body(req);
+if (
+  typeof data.text !== &quot;string&quot; ||
+  !data.text.trim() ||
+  data.text.length &gt; 20000
+)
+  return json(res, 400, {
+    error: &quot;Enter a message of up to 20,000 characters.&quot;,
+  });</code></pre>
+<p class="code-explanation">The host rejects missing, empty, or oversized text before asking the provider to do work.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · attach before sending user.message · source excerpt</figcaption>
+<pre><code class="language-javascript">await attach(id);
+await client.beta.sessions.events.send(id, {
+  events: [
+    {
+      type: &quot;user.message&quot;,
+      content: [{ type: &quot;text&quot;, text: data.text.trim() }],
+    },
+  ],
+});</code></pre>
+<p class="code-explanation">attach() reuses an existing host reader or opens one before sending. The SDK receives a user.message event containing the trimmed prompt.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content"><h3>Observe the response · arrows 19–21</h3><p>The remote session emits agent and lifecycle events. The SDK delivers them to the host, which forwards them as browser SSE. The page renders the activity feed and updates the session state. An idle event's stop reason may be <code>end_turn</code>, <code>requires_action</code>, or <code>budget_reached</code>; these represent different outcomes.</p>
+
+<!-- walkthrough-code:5 -->
+<figure class="code-example">
+<figcaption>server.js · consume live provider events · source excerpt</figcaption>
+<pre><code class="language-javascript">for await (const event of stream) emit(state, event);</code></pre>
+<p class="code-explanation">The host consumes the SDK stream and sends each event through the same emit() function used for history.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>public/app.js · render message text · source excerpt</figcaption>
+<pre><code class="language-javascript">const content = document.createElement(&quot;p&quot;);
+content.textContent = (event.content || [])
+  .map((x) =&gt; x.text || JSON.stringify(x))
+  .join(&quot;\n&quot;);
+item.append(content);</code></pre>
+<p class="code-explanation">Inside the agent.message/user.message branch, the page creates a paragraph and assigns textContent, so returned text is displayed as text rather than interpreted as HTML.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>public/app.js · read an idle event · source excerpt</figcaption>
+<pre><code class="language-javascript">if (event.type === &quot;session.status_idle&quot;) {
+  const reason = event.stop_reason?.type || &quot;unknown&quot;;
+  $(&quot;status&quot;).textContent = &quot;Idle&quot;;
+  $(&quot;reason&quot;).textContent = reason;</code></pre>
+<p class="code-explanation">The displayed stop reason comes from the event. The following code maps that reason to an explanation; idle alone does not mean the requested business result is verified.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+          <li><div class="step-content"><h3>Keep the session ID and reconnect</h3><p>A completed turn does not create a new conversation or automatically archive the session. On returning from this page in the same tab, the lab restores the last session ID. Click <strong>Connect</strong> to reopen browser SSE. The host reuses its reader if one remains; otherwise, it opens the provider stream and loads history again.</p>
+
+<!-- walkthrough-code:6 -->
+<figure class="code-example">
+<figcaption>public/app.js · remember the connected session · source excerpt</figcaption>
+<pre><code class="language-javascript">try {
+  sessionStorage.setItem(&quot;session-lab-last-session&quot;, id);
+} catch {}</code></pre>
+<p class="code-explanation">connect() remembers the ID in this browser tab. Storage failures are tolerated so the lab still works when browser storage is unavailable.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>public/app.js · restore the ID on return · source excerpt</figcaption>
+<pre><code class="language-javascript">try {
+  const previousSession = sessionStorage.getItem(&quot;session-lab-last-session&quot;);
+  if (/^sesn_[A-Za-z0-9_-]+$/.test(previousSession || &quot;&quot;)) {
+    $(&quot;sessionId&quot;).value = previousSession;
+    notice(&quot;Your previous session ID is ready. Click Connect to view its events again.&quot;);
+  }
+} catch {}</code></pre>
+<p class="code-explanation">Returning from the guide or architecture page fills the session field and asks the student to click Connect. This code does not create a session, reconnect, or send a prompt automatically.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>public/app.js · explicitly reconnect · source excerpt</figcaption>
+<pre><code class="language-javascript">$(&quot;connect&quot;).onclick = () =&gt; {
+  try {
+    connect($(&quot;sessionId&quot;).value.trim());
+  } catch (e) {
+    notice(e.message, true);
+  }
+};</code></pre>
+<p class="code-explanation">The student chooses when to reconnect. connect() validates the ID and opens the browser EventSource shown in step 3.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · reuse an existing reader · source excerpt</figcaption>
+<pre><code class="language-javascript">async function attach(id) {
+  if (sessions.has(id)) return sessions.get(id);</code></pre>
+<p class="code-explanation">If the host still has the reader, it reuses it. Otherwise attach() continues with the stream-before-history sequence shown in step 2.</p>
+</figure>
+<!-- /walkthrough-code -->
+</div></li>
+        </ol>
+      </section>
+      <section class="student-section" aria-labelledby="optional-title">
+        <div class="student-heading"><p class="eyebrow">OPTIONAL BRANCHES</p><h2 id="optional-title">When the normal turn needs a host decision</h2></div>
+        <div class="architecture-branches with-code">
+          <article class="learning-card"><h3>Pending tool action</h3><p>With a suitably configured agent, inspect the event ID and input. The browser posts the chosen response to <code>/api/sessions/:id/action</code>. The host sends <code>user.tool_confirmation</code> for Allow/Deny, or <code>user.custom_tool_result</code> for a supplied result. These are separate event types. Follow subsequent events to see what happens next.</p>
+
+<!-- walkthrough-code:7 -->
+<figure class="code-example">
+<figcaption>server.js · construct the matching response event · source excerpt</figcaption>
+<pre><code class="language-javascript">let event;
+if (data.result === &quot;custom&quot;) {
+  if (typeof data.text !== &quot;string&quot; || !data.text.trim())
+    return json(res, 400, { error: &quot;Enter the custom tool result.&quot; });
+  event = {
+    type: &quot;user.custom_tool_result&quot;,
+    custom_tool_use_id: data.id,
+    content: [{ type: &quot;text&quot;, text: data.text }],
+  };
+} else
+  event = {
+    type: &quot;user.tool_confirmation&quot;,
+    tool_use_id: data.id,
+    result: data.result,
+  };
+await client.beta.sessions.events.send(id, { events: [event] });</code></pre>
+<p class="code-explanation">The validated action chooses between a custom tool result and a tool confirmation. Both reference the matching pending event ID; supplying a result and granting approval are different operations.</p>
+</figure>
+<!-- /walkthrough-code -->
+</article>
+          <article class="learning-card"><h3>Interrupt and inspect</h3><p><strong>Interrupt work</strong> posts to <code>/api/sessions/:id/interrupt</code>, which sends <code>user.interrupt</code>. Its acknowledgement is not proof the remote work stopped. <strong>Inspect session</strong> uses <code>sessions.retrieve</code> through the local session endpoint. Confirm idle or terminated state; navigating between pages only disconnects the browser view.</p>
+
+<!-- walkthrough-code:8 -->
+<figure class="code-example">
+<figcaption>server.js · send the interrupt request · source excerpt</figcaption>
+<pre><code class="language-javascript">if (req.method === &quot;POST&quot; &amp;&amp; operation === &quot;interrupt&quot;) {
+  await client.beta.sessions.events.send(id, {
+    events: [{ type: &quot;user.interrupt&quot; }],
+  });
+  return json(res, 200, { ok: true });
+}</code></pre>
+<p class="code-explanation">A successful local response means the interrupt event was sent. This handler does not poll or confirm that the remote session has stopped.</p>
+</figure>
+
+<figure class="code-example">
+<figcaption>server.js · inspect the remote session · source excerpt</figcaption>
+<pre><code class="language-javascript">if (req.method === &quot;GET&quot; &amp;&amp; !operation)
+  return json(res, 200, await client.beta.sessions.retrieve(id));</code></pre>
+<p class="code-explanation">Inspect session retrieves the current provider record. Read its remote state, or wait for an appropriate status event, before concluding that work has stopped.</p>
+</figure>
+<!-- /walkthrough-code -->
+</article>
+        </div>
+        <p class="learning-outcome"><strong>Explain it back:</strong> why are there two event streams, why must the provider stream open before history is read, and which component decides how to respond to a pending action?</p>
+      </section>
+      <nav class="student-nav guide-footer" aria-label="Continue learning">
+        <a href="/guide.html#learning">Learning goals</a>
+        <a href="/guide.html#run-guide">Run instructions</a>
+        <a href="/architecture.html">Architecture &amp; workflow</a>
+        <a href="/#session-lab" class="lab-link">Return to the session lab ↗</a>
+      </nav>
+    </main>
+    <script src="/navigation.js"></script>
+  </body>
+</html>
