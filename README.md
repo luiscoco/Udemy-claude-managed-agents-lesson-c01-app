@@ -2,16 +2,6 @@
 
 This local app creates and observes Claude Managed Agents sessions. It streams session events, displays stop reasons, and lets you interrupt work or respond to tool actions.
 
-The separate [student guide](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/guide.html) includes **What you will learn** with six learning goals and **How to run this application** with numbered setup and first-run instructions. Navigation buttons on both pages link the learning goals, run instructions, and [session lab](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/index.html). Both pages share the same light/dark preference. These repository links open source files on GitHub. Follow the setup instructions below to view the running pages locally.
-
-After visiting the guide in the same browser tab, the app restores your last session ID. Click **Connect** to view its events again. Visiting the guide does not stop remote work or submit another prompt.
-
-The [Architecture & workflow page](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.html) shows a UML sequence infographic with five participants and 21 numbered messages, followed by a walkthrough of the actual routes and optional action/interrupt branches. It uses the application palette and large text. View the [SVG](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.svg) or [PNG](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.png) in the repository. Regenerate the editable SVG with `python scripts/build-sequence-diagram.py`; the optional `scripts/preview-student-guide.py` script renders its PNG using Python Playwright.
-
-Every walkthrough step and optional branch includes source-labelled code excerpts and explanations. Refresh these excerpts from `server.js` and `public/app.js` with `python scripts/build-walkthrough-snippets.py`. The displayed snippets are excerpts of the actual handlers; use the source files for their complete surrounding logic.
-
-The architecture page starts with a **Step 0** prerequisite walkthrough: configure the API key, create or reuse an agent and environment, save the printed IDs in `.env`, and start the app. It includes actual excerpts from `scripts/create-agent.js` and `scripts/create-environment.js`. Resource creation is setup work; it is not repeated for every conversation.
-
 ## Before you start
 
 You need:
