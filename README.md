@@ -2,11 +2,11 @@
 
 This local app creates and observes Claude Managed Agents sessions. It streams session events, displays stop reasons, and lets you interrupt work or respond to tool actions.
 
-The separate [student guide](http://127.0.0.1:3000/guide.html) includes **What you will learn** with six learning goals and **How to run this application** with numbered setup and first-run instructions. Navigation buttons on both pages link the learning goals, run instructions, and [session lab](http://127.0.0.1:3000/#session-lab). Both pages share the same light/dark preference. If you change `PORT`, use that port in these addresses.
+The separate [student guide](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/guide.html) includes **What you will learn** with six learning goals and **How to run this application** with numbered setup and first-run instructions. Navigation buttons on both pages link the learning goals, run instructions, and [session lab](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/index.html). Both pages share the same light/dark preference. These repository links open source files on GitHub. Follow the setup instructions below to view the running pages locally.
 
 After visiting the guide in the same browser tab, the app restores your last session ID. Click **Connect** to view its events again. Visiting the guide does not stop remote work or submit another prompt.
 
-The [Architecture & workflow page](http://127.0.0.1:3000/architecture.html) shows a UML sequence infographic with five participants and 21 numbered messages, followed by a walkthrough of the actual routes and optional action/interrupt branches. It uses the application palette and large text. Download the [SVG](http://127.0.0.1:3000/architecture.svg) or [PNG](http://127.0.0.1:3000/architecture.png) from that page. Regenerate the editable SVG with `python scripts/build-sequence-diagram.py`; the preview script below renders its PNG.
+The [Architecture & workflow page](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.html) shows a UML sequence infographic with five participants and 21 numbered messages, followed by a walkthrough of the actual routes and optional action/interrupt branches. It uses the application palette and large text. View the [SVG](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.svg) or [PNG](https://github.com/luiscoco/Udemy-claude-managed-agents-lesson-c01-app/blob/main/public/architecture.png) in the repository. Regenerate the editable SVG with `python scripts/build-sequence-diagram.py`; the optional `scripts/preview-student-guide.py` script renders its PNG using Python Playwright.
 
 Every walkthrough step and optional branch includes source-labelled code excerpts and explanations. Refresh these excerpts from `server.js` and `public/app.js` with `python scripts/build-walkthrough-snippets.py`. The displayed snippets are excerpts of the actual handlers; use the source files for their complete surrounding logic.
 
@@ -20,9 +20,40 @@ You need:
 - An Anthropic API key for a workspace with access to Managed Agents.
 - The IDs of an existing managed agent and environment in that workspace. The app does not create these resources.
 
+## Create your local .env file
+
+Run these commands from the application folder containing `package.json`:
+
+```powershell
+npm install
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Open `.env` in your editor. The filename must be exactly `.env`, not `.env.txt`. Keep any existing configuration instead of overwriting it.
+
+```dotenv
+ANTHROPIC_API_KEY=your_api_key
+CLAUDE_MANAGED_AGENT_ID=your_agent_id
+CLAUDE_MANAGED_ENVIRONMENT_ID=your_environment_id
+PORT=3000
+```
+
+- `ANTHROPIC_API_KEY`: your workspace API key. Set this before running either resource-creation script.
+- `CLAUDE_MANAGED_AGENT_ID`: an existing agent ID or the ID printed by `npm run create-agent`.
+- `CLAUDE_MANAGED_ENVIRONMENT_ID`: an existing environment ID or the ID printed by `npm run create-environment`.
+- `PORT`: the local server port. Use `http://127.0.0.1:3000` for the example above.
+
+If you do not yet have the resource IDs, configure the API key first and follow the next section. Save the returned IDs into `.env`, then run `npm start`. Restart the server after editing `.env` so the host loads the new values. Keep the real file local; `.gitignore` excludes it while retaining `.env.example` for students.
+
+### Sanitized snapshot of the current configuration
+
+The image below was rendered from a sanitized copy of the current local `.env`. Every value except `PORT`, including resource IDs, is replaced before rendering. `[REDACTED]` is a documentation label, not a value to copy into your own configuration.
+
+![C01 .env configuration with API keys and resource IDs redacted](docs/images/env-redacted.png)
+
 ## Create an agent and environment
 
-After running `npm install`, create `.env` as described below and set `ANTHROPIC_API_KEY` to your real key. The two ID values can remain placeholders for now. Your workspace needs Managed Agents access.
+After running `npm install`, create `.env` as described above and set `ANTHROPIC_API_KEY` to your real key. The two ID values can remain placeholders for now. Your workspace needs Managed Agents access.
 
 From the project folder, run this command to create an agent. It reads the API key from .env and prints the new agent ID:
 
@@ -75,7 +106,7 @@ See Anthropic's [agent setup](https://platform.claude.com/docs/en/managed-agents
 
    Alternatively, use `npm run dev`. Both commands start the same server.
 
-5. Open [http://127.0.0.1:3000](http://127.0.0.1:3000) in your browser. If you changed `PORT`, use that port in the address instead.
+5. Open `http://127.0.0.1:3000` in your browser. If you changed `PORT`, use that port in the address instead.
 
 6. Click **New session**, enter a message, and click **Send message**. The activity feed shows the agent's messages and session events. To reconnect to an existing session, enter its session ID and click **Connect**.
 
@@ -120,7 +151,7 @@ The demo script defines `get_demo_fact`, a custom tool whose result must be supp
   Get-Process -Id <PID>
   ```
 
-  Then restart this app with `npm run dev` and open [http://127.0.0.1:3000](http://127.0.0.1:3000). Alternatively, set `PORT=3001` in `.env`, start the app, and open [http://127.0.0.1:3001](http://127.0.0.1:3001).
+  Then restart this app with `npm run dev` and open `http://127.0.0.1:3000`. Alternatively, set `PORT=3001` in `.env`, start the app, and open `http://127.0.0.1:3001`.
 
 - **Check the code:** Run `npm test` to check the server and browser JavaScript syntax. This does not test a live Anthropic session.
 
