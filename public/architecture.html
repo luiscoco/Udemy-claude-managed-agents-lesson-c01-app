@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>C01 · Architecture &amp; workflow</title>
     <link rel="stylesheet" href="/style.css" />
-  </head>
+  <link rel="stylesheet" href="/code-highlighting.css"></head>
   <body>
     <main>
       <div class="course-bar"><div class="course-title">How <span>Claude Managed Agents</span> Works</div><span class="course-tag">CONCEPT 01 / 60</span></div>
@@ -174,8 +174,7 @@ connect(session.id);</code></pre>
 <pre><code class="language-javascript">const stream = await client.beta.sessions.events.stream(id);
 const state = { events: [], seen: new Set(), listeners: new Set(), stream };
 try {
-  for await (const event of client.beta.sessions.events.list(id))
-    emit(state, event);
+  for await (const event of client.beta.sessions.events.list(id)) emit(state, event);
 } catch (error) {
   stream.controller.abort();
   throw error;
@@ -234,8 +233,7 @@ source.onmessage = (e) =&gt; showEvent(JSON.parse(e.data));</code></pre>
     Connection: &quot;keep-alive&quot;,
   });
   res.write(&quot;: connected\n\n&quot;);
-  for (const event of state.events)
-    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  for (const event of state.events) res.write(`data: ${JSON.stringify(event)}\n\n`);
   state.listeners.add(res);
   req.on(&quot;close&quot;, () =&gt; state.listeners.delete(res));
   return;
@@ -259,11 +257,7 @@ source.onmessage = (e) =&gt; showEvent(JSON.parse(e.data));</code></pre>
 <figure class="code-example">
 <figcaption>server.js · validate message text · source excerpt</figcaption>
 <pre><code class="language-javascript">const data = await body(req);
-if (
-  typeof data.text !== &quot;string&quot; ||
-  !data.text.trim() ||
-  data.text.length &gt; 20000
-)
+if (typeof data.text !== &quot;string&quot; || !data.text.trim() || data.text.length &gt; 20000)
   return json(res, 400, {
     error: &quot;Enter a message of up to 20,000 characters.&quot;,
   });</code></pre>
@@ -331,7 +325,9 @@ item.append(content);</code></pre>
   const previousSession = sessionStorage.getItem(&quot;session-lab-last-session&quot;);
   if (/^sesn_[A-Za-z0-9_-]+$/.test(previousSession || &quot;&quot;)) {
     $(&quot;sessionId&quot;).value = previousSession;
-    notice(&quot;Your previous session ID is ready. Click Connect to view its events again.&quot;);
+    notice(
+      &quot;Your previous session ID is ready. Click Connect to view its events again.&quot;,
+    );
   }
 } catch {}</code></pre>
 <p class="code-explanation">Returning from the guide or architecture page fills the session field and asks the student to click Connect. This code does not create a session, reconnect, or send a prompt automatically.</p>
@@ -420,5 +416,5 @@ await client.beta.sessions.events.send(id, { events: [event] });</code></pre>
       </nav>
     </main>
     <script src="/navigation.js"></script>
-  </body>
+  <script defer src="/prism.js"></script><script defer src="/code-highlighting.js"></script></body>
 </html>

@@ -35,12 +35,6 @@ PORT=3000
 
 If you do not yet have the resource IDs, configure the API key first and follow the next section. Save the returned IDs into `.env`, then run `npm start`. Restart the server after editing `.env` so the host loads the new values. Keep the real file local; `.gitignore` excludes it while retaining `.env.example` for students.
 
-### Sanitized snapshot of the current configuration
-
-The image below was rendered from a sanitized copy of the current local `.env`. Every value except `PORT`, including resource IDs, is replaced before rendering. `[REDACTED]` is a documentation label, not a value to copy into your own configuration.
-
-![C01 .env configuration with API keys and resource IDs redacted](docs/images/env-redacted.png)
-
 ## Create an agent and environment
 
 After running `npm install`, create `.env` as described above and set `ANTHROPIC_API_KEY` to your real key. The two ID values can remain placeholders for now. Your workspace needs Managed Agents access.

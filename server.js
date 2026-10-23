@@ -174,7 +174,7 @@ async function main(req, res) {
   }
   if (
     req.method === "GET" &&
-    ["/", "/guide.html", "/architecture.html", "/architecture.svg", "/architecture.png", "/app.js", "/navigation.js", "/style.css", "/astronaut.png"].includes(url.pathname)
+    ["/", "/guide.html", "/architecture.html", "/architecture.svg", "/architecture.png", "/app.js", "/navigation.js", "/prism.js", "/code-highlighting.js", "/code-highlighting.css", "/style.css", "/astronaut.png"].includes(url.pathname)
   ) {
     const name = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
     res.writeHead(200, {

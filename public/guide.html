@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>C01 · Student guide</title>
     <link rel="stylesheet" href="/style.css" />
-  </head>
+  <link rel="stylesheet" href="/code-highlighting.css"></head>
   <body>
     <main>
       <div class="course-bar"><div class="course-title">How <span>Claude Managed Agents</span> Works</div><span class="course-tag">CONCEPT 01 / 60</span></div>
@@ -78,14 +78,14 @@
             <div class="step-content">
               <h3>Open the C01 application folder</h3>
               <p>Install Node.js 20 or later with npm. From the <strong>presentations</strong> folder, open the app directory:</p>
-              <pre><code>cd .\lesson-c01\lesson-c01-app</code></pre>
+              <pre><code class="language-powershell">cd .\lesson-c01\lesson-c01-app</code></pre>
               <p class="step-note">If your terminal is already inside <code>lesson-c01-app</code>, continue with step 2. This is the folder containing <code>package.json</code>.</p>
             </div>
           </li>
           <li>
             <div class="step-content">
               <h3>Install the dependencies</h3>
-              <pre><code>npm install</code></pre>
+              <pre><code class="language-powershell">npm install</code></pre>
               <p>Wait for the command to finish. You normally do this once after downloading the app, or again when its dependencies change.</p>
             </div>
           </li>
@@ -93,9 +93,11 @@
             <div class="step-content">
               <h3>Configure your local environment</h3>
               <p>Keep your existing <code>.env</code>. If it does not exist, create it from the example:</p>
-              <pre><code>if (!(Test-Path .env)) { Copy-Item .env.example .env }</code></pre>
+              <pre><code class="language-javascript">if (!(Test - Path.env)) {
+  Copy - Item.env.example.env;
+}</code></pre>
               <p>Open <code>.env</code> in your editor and fill in your workspace credentials and resource IDs:</p>
-              <pre><code>ANTHROPIC_API_KEY=your_api_key
+              <pre><code class="language-dotenv">ANTHROPIC_API_KEY=your_api_key
 CLAUDE_MANAGED_AGENT_ID=your_agent_id
 CLAUDE_MANAGED_ENVIRONMENT_ID=your_environment_id
 PORT=3000</code></pre>
@@ -103,7 +105,7 @@ PORT=3000</code></pre>
               <details class="resource-help">
                 <summary>Need an agent ID or environment ID?</summary>
                 <p>After setting your API key, create only the resources you are missing:</p>
-                <pre><code>npm run create-agent
+                <pre><code class="language-powershell">npm run create-agent
 npm run create-environment</code></pre>
                 <p>Each command prints an ID to copy into the matching <code>.env</code> entry. Each run creates a new remote resource, so save and reuse the IDs.</p>
               </details>
@@ -112,7 +114,7 @@ npm run create-environment</code></pre>
           <li>
             <div class="step-content">
               <h3>Start the server and open the page</h3>
-              <pre><code>npm start</code></pre>
+              <pre><code class="language-powershell">npm start</code></pre>
               <p>When the terminal prints <code>Listening on http://127.0.0.1:3000</code>, the app is ready. Open <a href="http://127.0.0.1:3000">http://127.0.0.1:3000</a> in your browser. If you changed <code>PORT</code>, use that port instead.</p>
               <p class="step-note">The terminal stays busy because it is serving the page. You can now use the application.</p>
             </div>
@@ -147,5 +149,5 @@ npm run create-environment</code></pre>
       </nav>
     </main>
     <script src="/navigation.js"></script>
-  </body>
+  <script defer src="/prism.js"></script><script defer src="/code-highlighting.js"></script></body>
 </html>
